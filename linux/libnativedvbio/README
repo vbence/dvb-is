@@ -1,0 +1,27 @@
+libNativeDVBIO
+==============
+
+This is the video for linux (V4L) implementation of the native library used
+by JAVA DVB Input Stream API at: http://czentral.org/dvb/io/
+
+To compile you need the V4L and JNI headers available on standard include
+paths. Additional paths can be defined using CFLAGS environment variables.
+About the usage of CFLAGS please check out your gcc documentation.
+
+INSTALL
+=======
+
+Before running ./configure, you have to ensure the correct PREFIX used by your
+system. This is the default directory for 3rd party (non-system) programs and
+it is dependant on your DISTRIBUTION. FreeBDS uses /usr/local which is the
+default. Debian (and many other linux distros) on the other hand use /usr
+directory.
+
+So if you are installing this package on Debian/GNU Linux you have to run:
+$ ./configure --prefix=/usr
+
+If configuration failed due to missing jni headers, you have to find them and
+add the directory to CFLAGS. Note that CFLAGS could already have a value so
+it's a good idea to append any old values after ours. A quick example
+for OpenJDK:
+$ export CFLAGS="-I/usr/lib/jvm/java-6-openjdk/include $CFLAGS"

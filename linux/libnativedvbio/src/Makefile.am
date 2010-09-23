@@ -1,0 +1,2 @@
+lib_LTLIBRARIES = libNativeDVBIO.la
+libNativeDVBIO_la_SOURCES = dvb_resource.h dvb_resource_collection.h org_czentral_dvb_io_NativeDVBIO.h dvb_resource.c dvb_resource_collection.c org_czentral_dvb_io_NativeDVBIO.c

@@ -1,0 +1,13 @@
+<html>
+<head>
+</head>
+<body>
+<p>Provides access to the raw MPEG2 TS data stream broadcasted using an RF carrier.</p>
+<p>The package offers an API to tune to the specified transpoder, list available devices, and otionally choose the device to use.</p>
+<pre>
+    DVBTStreamLocator locator = new DVBTStreamLocator();
+    locator.setFrequency(610000000);
+    DVBInputStream is = locator.getInputStream();
+</pre>
+</body>
+</html>
