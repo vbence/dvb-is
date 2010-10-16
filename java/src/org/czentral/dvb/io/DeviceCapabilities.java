@@ -30,17 +30,17 @@ public abstract class DeviceCapabilities {
 	/**
 	 * DVB-S system used by satellite recievers.
 	 */
-	public static int CAPABLE_DVBS = 2 ^ 0;
+	public static int CAPABLE_DVBS = 1;
 	
 	/**
 	 * DVB-C system used by cable receivers.
 	 */
-	public static int CAPABLE_DVBC = 2 ^ 1;
+	public static int CAPABLE_DVBC = 2;
 	
 	/**
 	 * DVB-T system used by terrestrial recievers.
 	 */
-	public static int CAPABLE_DVBT = 2 ^ 2;
+	public static int CAPABLE_DVBT = 4;
 	
 	
 	/**
