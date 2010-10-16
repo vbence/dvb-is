@@ -61,7 +61,7 @@ class LocalDVBDevice implements DVBDevice {
 	
 	public DVBInputStream openStreamAt(StreamLocator locator) throws IOException {
 		NativeDVBIO io = new NativeDVBIO();
-		io.open(locator.getFrequency(), name);
+		io.open(locator.getFrequency(), path);
 		return io;
 	}
 
