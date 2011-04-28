@@ -15,6 +15,8 @@ You should have received a copy of the GNU General Public License
 along with DVB Input Stream API.  If not, see <http://www.gnu.org/licenses/>.
 */ 
 
+package org.czentral.dvb.io;
+
 import org.czentral.dvb.io.*;
 import java.io.*;
 
@@ -44,38 +46,53 @@ public class NativeTest {
 			System.out.println(devices[i].getName() + " - " + devices[i].getPath());
 		}
 		
-		// reading a TS packet (alway exactly 188 bytes)
+		// a friendly message
+		System.out.println("-- Tuning and reading a single packet two times");
+		
+		// reading a TS packet
 		try {
+			
+			// TS  packet is alway exactly 188 bytes
 			byte[] buffer = new byte[188];
 			
-			DVBTStreamLocator locator = new DVBTStreamLocator();
-			locator.setFrequency(frequency);
-			DVBInputStream is = locator.getInputStream();
-			
-			System.out.print("Waiting 2 seconds for data ... ");
-			Thread.sleep(2000);
-			System.out.println("done");
-			
-			
-			if (is.available() > 0) {
+			// we test it two times (to test closing and repoening)
+			for (int k=0; k<2; k++) {
 				
-				// there is data available
-				int bytesRed = is.read(buffer);
-				for (int i=0; i<Math.min(16, bytesRed); i++)
-					System.out.print(Integer.toHexString(buffer[i] & 0xff) + " ");
-			
-				System.out.println("...");
+				// tune
+				DVBTStreamLocator locator = new DVBTStreamLocator();
+				locator.setFrequency(frequency);
 				
-			} else {
+				// open the stream
+				DVBInputStream is = locator.getInputStream();
 				
-				// no data
-				System.out.println("no data!");
+				// not an ideal solution, but so far no timeout implemented and we don't want to wait forever
+				System.out.print("\r\nWaiting 2 seconds for data ... ");
+				Thread.sleep(2000);
+				System.out.println("done");		
 				
+				// is data available?
+				if (is.available() > 0) {
+					
+					// there is data available
+					int bytesRed = is.read(buffer);
+					for (int i=0; i<Math.min(16, bytesRed); i++)
+						System.out.print(Integer.toHexString(buffer[i] & 0xff) + " ");
+				
+					System.out.println("...");
+					
+				} else {
+					
+					// no data
+					System.out.println("no data!");
+					
+				}
+				
+				// closing the InputStream
+				is.close();
 			}
 			
-			is.close();
-			
 		} catch (Exception e) {
+			// something went terribly wrong
 			e.printStackTrace();
 		}
 		

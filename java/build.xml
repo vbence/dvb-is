@@ -1,0 +1,38 @@
+<project name="dvb-is" default="dist" basedir=".">
+    <description>
+        DVB InputStream is a Java API to access raw Transport Stream data broadcasted on DVB networks.
+    </description>
+
+    <!-- set global properties for this build -->
+    <property name="src" location="src"/>
+    <property name="classes" location="classes"/>
+    <property name="dist" location="dist"/>
+
+    <target name="init">
+        <!-- Create the time stamp -->
+        <tstamp/>
+        <!-- Create the build directory structure used by compile -->
+        <mkdir dir="${dist}"/>
+        <mkdir dir="${classes}"/>
+    </target>
+
+    <target name="compile" depends="init" description="compile the source">
+        <!-- Compile the java code from ${src} into ${build} -->
+        <!-- includeantruntime="false" is a workaround for ant 1.8 -->
+        <javac srcdir="${src}" destdir="${classes}" includeantruntime="false"/>
+    </target>
+
+    <target name="dist" depends="compile" description="generate the distribution">
+        <!-- Create the distribution directory -->
+        <mkdir dir="${dist}/lib"/>
+        
+        <!-- Create JAR file from all the classes -->
+        <jar jarfile="${dist}/lib/dvb-is.jar" basedir="${classes}"/>
+    </target>
+
+    <target name="clean" description="clean up">
+        <!-- Delete the ${classes} and ${dist} directory trees -->
+        <delete dir="${classes}"/>
+        <delete dir="${dist}"/>
+    </target>
+</project>
