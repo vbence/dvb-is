@@ -241,7 +241,7 @@ int dvbres_open(struct dvb_resource* res, uint64_t freq, char* device) {
 			rc = ioctl(res->frontend, FE_GET_INFO, &finfo);
 			if (rc) {
 				close(res->frontend);
-				return _dvbres_error(res, "Rading frontend info", errno);
+				return _dvbres_error(res, "Reading frontend info", errno);
 			}
 			
 			// if not DVB-T then we skip to the next adapter
@@ -267,7 +267,7 @@ int dvbres_open(struct dvb_resource* res, uint64_t freq, char* device) {
 		rc = ioctl(res->frontend, FE_GET_INFO, &finfo);
 		if (rc) {
 			close(res->frontend);
-			return _dvbres_error(res, "Rading frontend info", errno);
+			return _dvbres_error(res, "Reading frontend info", errno);
 		}
 		
 		// if not DVB-T then we close and return an error
@@ -414,14 +414,20 @@ int dvbres_close(struct dvb_resource* res) {
 		return _dvbres_error(res, "No open device (already closed?)", errno);
 	
 	// closing
-	if (res->dvr)
+	if (res->dvr) {
 		rc = close(res->dvr);
-
-	if (res->demux)
+		res->dvr = NULL;
+	}
+	
+	if (res->demux) {
 		rc = close(res->demux);
+		res->demux = NULL;
+	}
 
-	if (res->frontend)
+	if (res->frontend) {
 		rc = close(res->frontend);
+		res->frontend = NULL;
+	}
 		
 	// all ok
 	return _dvbres_ok(res);
