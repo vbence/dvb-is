@@ -205,8 +205,11 @@ begin
 
         // getting friendly name
         hr := PropertyBag.Read('FriendlyName', FriendlyNameOle, nil);
-        if FAILED(hr) then
-            raise Exception.Create('Getting friendly name: ' + SysErrorMessage(hr));
+        if FAILED(hr) then begin
+            hr := PropertyBag.Read('CLSID', FriendlyNameOle, nil);
+            if FAILED(hr) then
+                raise Exception.Create('Getting friendly name or CLSID: ' + SysErrorMessage(hr));
+        end;
 
         // getting the current filter
         hr := Moniker.BindToObject(nil, nil, IID_IBaseFilter, Filter);
@@ -305,8 +308,11 @@ begin
 
             // getting friendly name
             hr := PropertyBag.Read('FriendlyName', FriendlyNameOle, nil);
-            if FAILED(hr) then
-                raise Exception.Create('Getting friendly name: ' + SysErrorMessage(hr));
+            if FAILED(hr) then begin
+                hr := PropertyBag.Read('CLSID', FriendlyNameOle, nil);
+                if FAILED(hr) then
+                    raise Exception.Create('Getting friendly name or CLSID: ' + SysErrorMessage(hr));
+            end;
 
             // getting the current filter
             hr := Moniker.BindToObject(nil, nil, IID_IBaseFilter, Filter);
