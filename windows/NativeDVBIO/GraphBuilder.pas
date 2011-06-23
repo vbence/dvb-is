@@ -207,8 +207,9 @@ begin
         hr := PropertyBag.Read('FriendlyName', FriendlyNameOle, nil);
         if FAILED(hr) then begin
             hr := PropertyBag.Read('CLSID', FriendlyNameOle, nil);
-            if FAILED(hr) then
-                raise Exception.Create('Getting friendly name or CLSID: ' + SysErrorMessage(hr));
+            if FAILED(hr) then begin
+                FriendlyNameOle := 'Unnamed Filter';
+            end;
         end;
 
         // getting the current filter
@@ -310,8 +311,9 @@ begin
             hr := PropertyBag.Read('FriendlyName', FriendlyNameOle, nil);
             if FAILED(hr) then begin
                 hr := PropertyBag.Read('CLSID', FriendlyNameOle, nil);
-                if FAILED(hr) then
-                    raise Exception.Create('Getting friendly name or CLSID: ' + SysErrorMessage(hr));
+                if FAILED(hr) then begin
+                    FriendlyNameOle := 'Unnamed Filter';
+                end;
             end;
 
             // getting the current filter
