@@ -95,9 +95,7 @@ begin
     FID := JVM.GetFieldID(Cls, 'resourceID', 'I');
     ResourceID := JVM.GetIntField(Obj, FID);
 
-    if ResourceID = 0 then begin
-        Throw(PEnv, Obj, 'Stream not open.');
-    end else begin
+    if ResourceID <> 0 then begin
         StreamReader := FStreamReaders.GetByID(ResourceID);
 
         try

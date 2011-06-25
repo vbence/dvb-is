@@ -23,7 +23,6 @@ uses
     JNI,
     ActiveX,
     Windows,
-    Forms,
     SysUtils,
     Classes,
     DirectShow9,
@@ -242,7 +241,7 @@ function TStreamReader.Read(TargetPointer: PByte; MaxLength: Integer): Integer;
 var
     ToCopy: Integer;
     rc: Integer;
-begin                           
+begin
     Result := 0;
 
     // if no data, we wait for the semaphore

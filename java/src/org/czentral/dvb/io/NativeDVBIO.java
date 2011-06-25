@@ -26,9 +26,13 @@ class NativeDVBIO extends DVBInputStream {
 	}
 	
 	private int resourceID = 0;
+	
+	public NativeDVBIO() {
+		Runtime.getRuntime().addShutdownHook(new ShutdownHook());
+	}
 
 	public native void open(long freq, String adapter) throws IOException;
-
+	
 	public native int available() throws IOException;
 
 	public native boolean isSignalPresent() throws IOException;
@@ -50,8 +54,9 @@ class NativeDVBIO extends DVBInputStream {
 	public int read(byte[] buffer) throws IOException {
 		return read(buffer, 0, buffer.length);
 	}
-	
+
 	public native int read(byte[] buffer, int offset, int length) throws IOException;
+	
 	
 	public static native String listDevices() throws IOException;
 	
@@ -59,11 +64,13 @@ class NativeDVBIO extends DVBInputStream {
 		return "NativeDVBIO(resourceID: " + resourceID + ")";
 	}
 	
-	public void finalize() {
-		try {
-			close();
-		} catch (IOException e) {
-			e.printStackTrace();
+	class ShutdownHook extends Thread {
+		public void run() {
+			try {
+				close();
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
 		}
 	}
 }
