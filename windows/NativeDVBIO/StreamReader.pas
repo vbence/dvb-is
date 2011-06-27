@@ -41,6 +41,7 @@ type
         procedure Start;
         procedure Stop;
         procedure DataReceived(DataPointer: PByte; DataLength: Integer);
+        procedure EndOfStream();
         function Read(TargetPointer: PByte; MaxLength: Integer): Integer;
         function GetDataLength: Integer;
         function IsSignalPresent: Boolean;
@@ -169,7 +170,7 @@ end;
 
 procedure TStreamReader.DataReceived(DataPointer: PByte; DataLength: Integer);
 const
-    CPacketLength: Integer = 188;    
+    CPacketLength: Integer = 188;
 var
     Pointer, ToCopy: Integer;
 begin
@@ -237,6 +238,12 @@ begin
 
 end;
 
+procedure TStreamReader.EndOfStream();
+begin
+    Stop();
+    ReleaseSemaphore(FSemaphore, 1, nil);
+end;
+
 function TStreamReader.Read(TargetPointer: PByte; MaxLength: Integer): Integer;
 var
     ToCopy: Integer;
@@ -246,6 +253,9 @@ begin
 
     // if no data, we wait for the semaphore
     while FDataLength = 0 do begin
+
+        if not FRuns then
+            raise Exception.Create('Filter not running.');
 
         (* But WHAT IF two (or more) threads are reading concurrently from this
          * object and BOTH of them are here, waiting for data? According to doc

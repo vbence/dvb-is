@@ -28,6 +28,7 @@ const
 type
     IStreamBuffer = interface
         procedure DataReceived(DataPointer: PByte; DataLength: Integer);
+        procedure EndOfStream();
     end;
 
     TStreamDumpInputPin = class(TBCRenderedInputPin)
@@ -37,6 +38,7 @@ type
     public
         function CheckMediaType(mt: PAMMediaType): HRESULT; override;
         function Receive(pSample: IMediaSample): HRESULT; override;
+        function EndOfStream: HRESULT; override;
         constructor Create(StreamBuffer: IStreamBuffer; ObjectName: string; Filter: TBCBaseFilter; Lock: TBCCritSec; out hr: HRESULT; Name: WideString);
         destructor Destroy; override;
     end;
@@ -92,6 +94,16 @@ begin
     Result := S_OK;
 end;
 
+function TStreamDumpInputPin.EndOfStream(): HRESULT;
+begin
+    FLock.Lock;
+    try
+        FStreamBuffer.EndOfStream();
+    finally
+        FLock.UnLock;
+    end;
+    Result := S_OK;
+end;
 
 constructor TStreamDumpFilter.Create(StreamBuffer: IStreamBuffer);
 var

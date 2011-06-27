@@ -26,6 +26,7 @@ type
     TGraphHelper = class
     public
         constructor Create(GraphBuilder: IGraphBuilder);
+        function DisconnectFrom(FilterOne: IBaseFilter; FilterTwo: IBaseFilter): HRESULT;
         function ConnectTo(FilterOutput: IBaseFilter; FilterInput: IBaseFilter): HRESULT;
         function ConnectToNew(clsid: TGUID; var NewFilter: IBaseFilter; ExistingFilter: IBaseFilter): HRESULT;
         function ConnectToFirstApplicable(catid: TGUID; var NewFilter: IBaseFilter; ExistingFilter: IBaseFilter): HRESULT;
@@ -161,6 +162,63 @@ begin
     Result := E_FAIL;
 end;
 
+// disconnecting two connected filters
+function TGraphHelper.DisconnectFrom(FilterOne: IBaseFilter; FilterTwo: IBaseFilter): HRESULT;
+var
+    // COM return code
+    hr: HRESULT;
+
+    // pins enumeration and information
+    EnumFilterOnePins: IEnumPins;
+    PinOne: IPin;
+    TempPin: IPin;
+    TmpPinInfo: PIN_INFO;
+begin
+    // enumerating FilterOne's pins
+    hr := FilterOne.EnumPins(EnumFilterOnePins);
+    if FAILED(hr) then
+        raise Exception.Create('Enumerating upstream pins: ' + SysErrorMessage(hr));
+
+    // iterate through FilterOne's pins
+    while EnumFilterOnePins.Next(1, PinOne, nil) = S_OK do begin
+
+        // current pin's info
+        hr := PinOne.QueryPinInfo(TmpPinInfo);
+        if FAILED(hr) then
+            raise Exception.Create('Getting first pin info.' + SysErrorMessage(hr));
+
+        // getting the connection end point (if any)
+        PinOne.ConnectedTo(TempPin);
+
+        // IF connected
+        if (TempPin <> nil) then begin
+
+            // getting entpoint poin's info
+            hr := TempPin.QueryPinInfo(TmpPinInfo);
+            if FAILED(hr) then
+                raise Exception.Create('Getting second pin info.' + SysErrorMessage(hr));
+
+            // IF the endpoint is inside FilterTwo
+            if (TmpPinInfo.pFilter = FilterTwo) then begin
+
+                // discoonnect (break the connection between the two pins)
+                hr := PinOne.Disconnect();
+                if FAILED(hr) then
+                    raise Exception.Create('Disconnecting pins.' + SysErrorMessage(hr));
+
+            // if
+            end;
+
+        // if
+        end;
+
+    // while
+    end;
+
+    // if no errors this far we assume that it is OK
+    Result := S_OK;
+end;
+
 
 // finds the first applicable filter from the given category, and connects it
 // with the existing "ExistingFilter"
@@ -230,7 +288,7 @@ begin
 
             // is connection successful?
             if SUCCEEDED(hr) then begin
-                newFilter := Filter;
+                NewFilter := Filter;
                 Result := S_OK;
                 Exit;
             end else begin
@@ -406,12 +464,13 @@ begin
         end else begin
 
             // removing filter
-            hr := FGraphBuilder.RemoveFilter(NewFilter);
+            hr := FGraphBuilder.RemoveFilter(Filter);
             if FAILED(hr) then
                raise Exception.Create('Removing failing filter: ' + SysErrorMessage(hr));
 
             // destroying object
-            FreeAndNil(Filter);
+            //FreeAndNil(Filter);
+            Filter := nil;
         end;
 
     end else begin
@@ -674,16 +733,44 @@ begin
 
     end;
 
-    // create a capture device (the conjoint twin of the TunerDevice previously crteated)
-    hr := Helper.ConnectToFirstApplicable(KSCATEGORY_BDA_RECEIVER_COMPONENT, CaptureDevice, TunerDevice);
-    if FAILED(hr) then
-       raise Exception.Create('Loading capture device: ' + SysErrorMessage(hr));
+    
+    (* Some drivers do not need a Captire device (BDA Receiver Component). These
+     * filters can be connected directly to the MPEG2 Demuxer filter. - We
+     * detect this behavior by trying the connection. If we succeed then remove
+     * the Demuxer (as we have to connect them thru an InfTee). If we fail, then
+     * we create a Capture filter as usual.
+     *)
 
+    // testing tuner filter by trying connection to a MPEG2Demultiplexer
+    hr := Helper.ConnectToNew(CLSID_MPEG2Demultiplexer, Demux, TunerDevice);
+    if FAILED(hr) then begin
 
-    // connecting InfTee filter
-    hr := Helper.ConnectToNew(CLSID_InfTee, InfTee, CaptureDevice);
-    if FAILED(hr) then
-       raise Exception.Create('Loading Infinite Pin Tee: ' + SysErrorMessage(hr));
+        // Failure means we have to create a Capture device too.
+
+        // create a capture device (the conjoint twin of the TunerDevice previously crteated)
+        hr := Helper.ConnectToFirstApplicable(KSCATEGORY_BDA_RECEIVER_COMPONENT, CaptureDevice, TunerDevice);
+        if FAILED(hr) then
+           raise Exception.Create('Loading capture device: ' + SysErrorMessage(hr));
+
+        // connecting InfTee filter
+        hr := Helper.ConnectToNew(CLSID_InfTee, InfTee, CaptureDevice);
+        if FAILED(hr) then
+           raise Exception.Create('Loading Infinite Pin Tee: ' + SysErrorMessage(hr));
+
+    end else begin
+
+        // Connection was successful, we won't need Capture device.
+
+        // Removing testing filter (used for testing only).
+        FGraphBuilder.RemoveFilter(Demux);
+        FreeAndNil(Demux);
+
+        // connecting InfTee filter
+        hr := Helper.ConnectToNew(CLSID_InfTee, InfTee, TunerDevice);
+        if FAILED(hr) then
+           raise Exception.Create('Loading Infinite Pin Tee: ' + SysErrorMessage(hr));
+        
+    end;
 
 
     // adding MPEG2Demultiplexer (and connecting it to InfTee)
