@@ -763,7 +763,6 @@ begin
 
         // Removing testing filter (used for testing only).
         FGraphBuilder.RemoveFilter(Demux);
-        FreeAndNil(Demux);
 
         // connecting InfTee filter
         hr := Helper.ConnectToNew(CLSID_InfTee, InfTee, TunerDevice);
