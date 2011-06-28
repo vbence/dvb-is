@@ -763,12 +763,13 @@ begin
 
         // Removing testing filter (used for testing only).
         FGraphBuilder.RemoveFilter(Demux);
+        Demux := nil;
 
         // connecting InfTee filter
         hr := Helper.ConnectToNew(CLSID_InfTee, InfTee, TunerDevice);
         if FAILED(hr) then
            raise Exception.Create('Loading Infinite Pin Tee: ' + SysErrorMessage(hr));
-        
+
     end;
 
 
