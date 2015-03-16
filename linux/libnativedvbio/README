@@ -11,9 +11,16 @@ About the usage of CFLAGS please check out your gcc documentation.
 INSTALL
 =======
 
+The configure script is left out from the repository. To generate it you need
+to run the following commands (libtool needs to be installed):
+
+    libtoolize
+    autoreconf
+    automake --add-missing
+
 Before running ./configure, you have to ensure the correct PREFIX used by your
 system. This is the default directory for 3rd party (non-system) programs and
-it is dependant on your DISTRIBUTION. FreeBDS uses /usr/local which is the
+it is dependant on your DISTRIBUTION. FreeBSD uses /usr/local which is the
 default. Debian (and many other linux distros) on the other hand use /usr
 directory.
 
@@ -24,4 +31,4 @@ If configuration failed due to missing jni headers, you have to find them and
 add the directory to CFLAGS. Note that CFLAGS could already have a value so
 it's a good idea to append any old values after ours. A quick example
 for OpenJDK:
-$ export CFLAGS="-I/usr/lib/jvm/java-6-openjdk/include $CFLAGS"
+$ export CFLAGS="-I/usr/lib/jvm/java-7-openjdk/include $CFLAGS"
